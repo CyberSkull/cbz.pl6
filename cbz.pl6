@@ -3,7 +3,6 @@
 sub MAIN(Bool :k($keep), Bool :d($debug), *@folders)
 {
   my ($folder, $target, $flags, @promises, $proc, @args);
-  my @exceptions = ["*.DS_Store", "*[Tt]humbs.db"];
 
   # configure flags
   # -m delete originals
@@ -18,7 +17,7 @@ sub MAIN(Bool :k($keep), Bool :d($debug), *@folders)
   {
     $folder = IO::Path.new($_);
     next unless ($folder.d and $folder.r); #$folder is a directory and readable
-    @args = [$flags, $folder.basename ~ "\.cbz", $folder.basename, "-x", @exceptions];
+    @args = [$flags, $folder.basename ~ "\.cbz", $folder.basename, "-x", "*.DS_Store", "*[Tt]humbs.db"];
     say "zip " ~ @args if $debug;
     $proc = Proc::Async.new("zip", @args);
     @promises.push($proc.start);
