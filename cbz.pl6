@@ -2,7 +2,7 @@
 
 sub MAIN(Bool :k($keep), Bool :d($debug), *@folders)
 {
-  my ($folder, $target, $flags, @promises, $proc, @args);
+  my ($folder, $target, $flags, @promises, @args);
 
   # configure flags
   # -m delete originals
@@ -19,11 +19,10 @@ sub MAIN(Bool :k($keep), Bool :d($debug), *@folders)
     next unless ($folder.d and $folder.r); #$folder is a directory and readable
     @args = [$flags, $folder.basename ~ "\.cbz", $folder.basename, "-x", "*.DS_Store", "*[Tt]humbs.db"];
     say "zip " ~ @args if $debug;
-    $proc = Proc::Async.new("zip", @args);
-    @promises.push($proc.start);
+    @promises.push(Proc::Async.new("zip", @args).start);
   }
   await @promises;
-  say "Completed in " ~ (now - INIT now) ~ " seconds" if $debug;
+  say "Completed in " ~ (now - INIT now) ~ " seconds." if $debug;
 }
 
 =begin pod
