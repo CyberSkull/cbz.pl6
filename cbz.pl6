@@ -1,6 +1,6 @@
 #! /usr/bin/env perl6
 
-sub MAIN(Bool :k($keep), Bool :d($debug), *@folders)
+sub MAIN(Bool :k($keep), Bool :d($debug), Bool :t($test), *@folders)
 {
   my ($folder, $target, $flags, @promises, @args);
 
@@ -16,13 +16,14 @@ sub MAIN(Bool :k($keep), Bool :d($debug), *@folders)
   for @folders
   {
     $folder = IO::Path.new($_);
+    say $folder.basename if $debug or $test;
     next unless ($folder.d and $folder.r); #$folder is a directory and readable
     @args = [$flags, $folder.basename ~ "\.cbz", $folder.basename, "-x", "*.DS_Store", "*[Tt]humbs.db"];
-    say "zip " ~ @args if $debug;
-    @promises.push(Proc::Async.new("zip", @args).start);
+    say "zip " ~ @args if $debug or $test;
+    @promises.push(Proc::Async.new("zip", @args).start) unless $test;
   }
   await @promises;
-  say "Completed in " ~ (now - INIT now) ~ " seconds." if $debug;
+  say "Completed in " ~ (now - INIT now) ~ " seconds." if $debug or $test;
 }
 
 =begin pod
@@ -33,7 +34,7 @@ cbz – Perl 6 Comic Book Zip utility
 
 =head1 SYNOPSIS
 
-    cbz.pl6 [-k] [-d] [<folders> ...]
+    cbz.pl6 [-k] [-d] [-t] [<folders> ...]
 
 =head1 DESCRIPTION
 
@@ -51,6 +52,10 @@ successful test of the archive.
 =head2 -d
 
 Prints various debug information. For developers, really.
+
+=head2 -t
+
+Does a test run, does not invoke zip.
 
 =head2 FOLDERs
 
